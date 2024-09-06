@@ -2,6 +2,7 @@ package bitcask
 
 import (
 	"bitcask/data"
+	"bitcask/fio"
 	"bitcask/index"
 	"errors"
 	"fmt"
@@ -101,6 +102,13 @@ func Open(options Options) (*DB, error) {
 		// 从数据文件中加载索引
 		if err := db.loadDataIndexFromDataFiles(); err != nil {
 			return nil, err
+		}
+
+		// 重置 IO 类型为标准文件IO
+		if db.options.MMapAtStartup {
+			if err := db.resetIoType(); err != nil {
+				return nil, err
+			}
 		}
 	}
 
@@ -378,7 +386,7 @@ func (db *DB) setActiveDataFile() error {
 		initialFileId = db.activeFile.FileId + 1
 	}
 	// 打开新的数据文件
-	dataFile, err := data.OpenDataFile(db.options.DirPath, initialFileId)
+	dataFile, err := data.OpenDataFile(db.options.DirPath, initialFileId, fio.StandardFIO)
 	if err != nil {
 		return err
 	}
@@ -409,7 +417,11 @@ func (db *DB) loadDataFiles() error {
 	db.fileIds = fileIds
 
 	for i, fid := range fileIds {
-		dataFile, err := data.OpenDataFile(db.options.DirPath, uint32(fid))
+		ioType := fio.StandardFIO
+		if db.options.MMapAtStartup {
+			ioType = fio.MemoryMap
+		}
+		dataFile, err := data.OpenDataFile(db.options.DirPath, uint32(fid), ioType)
 		if err != nil {
 			return err
 		}
@@ -551,5 +563,22 @@ func (db *DB) loadSeqNo() error {
 	}
 	db.seqNo = seqNo
 	db.seqNoFileExists = true
+	return nil
+}
+
+// 将数据文件的 IO 类型设置为标准文件 IO
+func (db *DB) resetIoType() error {
+	if db.activeFile == nil {
+		return nil
+	}
+
+	if err := db.activeFile.SetIOMnager(db.options.DirPath, fio.StandardFIO); err != nil {
+		return err
+	}
+	for _, dataFile := range db.olderFiles {
+		if err := dataFile.SetIOMnager(db.options.DirPath, fio.StandardFIO); err != nil {
+			return err
+		}
+	}
 	return nil
 }

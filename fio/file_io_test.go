@@ -15,7 +15,7 @@ func destroyFile(name string) {
 }
 
 func TestNewFileIOManager(t *testing.T) {
-	path := filepath.Join("/KVStorage", "a.data")
+	path := filepath.Join("/tmp", "a.data")
 	fio, err := NewFileIOManager(path)
 	defer func() {
 		fio.Close()
@@ -27,7 +27,7 @@ func TestNewFileIOManager(t *testing.T) {
 }
 
 func TestFileIO_Write(t *testing.T) {
-	path := filepath.Join("/KVStorage", "a.data")
+	path := filepath.Join("/tmp", "a.data")
 	fio, err := NewFileIOManager(path)
 	defer func() {
 		fio.Close()
@@ -51,7 +51,7 @@ func TestFileIO_Write(t *testing.T) {
 }
 
 func TestFileIO_Read(t *testing.T) {
-	path := filepath.Join("/KVStorage", "a.data")
+	path := filepath.Join("/tmp", "a.data")
 	fio, err := NewFileIOManager(path)
 	defer func() {
 		fio.Close()
@@ -79,7 +79,7 @@ func TestFileIO_Read(t *testing.T) {
 }
 
 func TestFileIO_Sync(t *testing.T) {
-	path := filepath.Join("/KVStorage", "a.data")
+	path := filepath.Join("/tmp", "a.data")
 	fio, err := NewFileIOManager(path)
 	defer func() {
 		fio.Close()
@@ -94,7 +94,7 @@ func TestFileIO_Sync(t *testing.T) {
 }
 
 func TestFileIO_Close(t *testing.T) {
-	path := filepath.Join("/KVStorage", "a.data")
+	path := filepath.Join("/tmp", "a.data")
 	fio, err := NewFileIOManager(path)
 	defer func() {
 		fio.Close()

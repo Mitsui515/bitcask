@@ -40,4 +40,8 @@ func TestMMap_Read(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, int64(6), size)
 
+	b2 := make([]byte, 2)
+	n2, err := mmapIO2.Read(b2, 0)
+	assert.Nil(t, err)
+	assert.Equal(t, 2, n2)
 }

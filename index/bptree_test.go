@@ -17,9 +17,16 @@ func TestBPlusTree_Put(t *testing.T) {
 	}()
 	tree := NewBPlusTree(path, false)
 
-	tree.Put([]byte("ccc"), &data.LogRecordPos{Fid: 123, Offset: 999})
-	tree.Put([]byte("abc"), &data.LogRecordPos{Fid: 123, Offset: 999})
-	tree.Put([]byte("acc"), &data.LogRecordPos{Fid: 123, Offset: 999})
+	res1 := tree.Put([]byte("ccc"), &data.LogRecordPos{Fid: 123, Offset: 999})
+	assert.Nil(t, res1)
+	res2 := tree.Put([]byte("abc"), &data.LogRecordPos{Fid: 123, Offset: 999})
+	assert.Nil(t, res2)
+	res3 := tree.Put([]byte("acc"), &data.LogRecordPos{Fid: 123, Offset: 999})
+	assert.Nil(t, res3)
+
+	res4 := tree.Put([]byte("acc"), &data.LogRecordPos{Fid: 515, Offset: 14})
+	assert.Equal(t, uint32(123), res4.Fid)
+	assert.Equal(t, int64(999), res4.Offset)
 }
 
 func TestBPlusTree_Get(t *testing.T) {
@@ -50,12 +57,15 @@ func TestBPlusTree_Delete(t *testing.T) {
 	}()
 	tree := NewBPlusTree(path, false)
 
-	res1 := tree.Delete([]byte("not exist"))
-	assert.False(t, res1)
+	res1, ok1 := tree.Delete([]byte("not exist"))
+	assert.False(t, ok1)
+	assert.Nil(t, res1)
 
 	tree.Put([]byte("ccc"), &data.LogRecordPos{Fid: 123, Offset: 999})
-	res2 := tree.Delete([]byte("ccc"))
-	assert.True(t, res2)
+	res2, ok2 := tree.Delete([]byte("ccc"))
+	assert.True(t, ok2)
+	assert.Equal(t, uint32(123), res2.Fid)
+	assert.Equal(t, int64(999), res2.Offset)
 
 	pos1 := tree.Get([]byte("ccc"))
 	assert.Nil(t, pos1)

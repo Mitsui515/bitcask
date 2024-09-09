@@ -77,7 +77,7 @@ func handleDelete(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	writer.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(writer).Encode(string("OK"))
+	_ = json.NewEncoder(writer).Encode(string("Delete successfully"))
 }
 
 func handleListKeys(writer http.ResponseWriter, request *http.Request) {
@@ -106,6 +106,45 @@ func handleStat(writer http.ResponseWriter, request *http.Request) {
 	_ = json.NewEncoder(writer).Encode(stat)
 }
 
+func handleMerge(writer http.ResponseWriter, request *http.Request) {
+	if request.Method != http.MethodPost {
+		http.Error(writer, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	err := db.Merge()
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
+		log.Printf("failed to merge db: %v\n", err)
+		return
+	}
+
+	writer.Header().Set("Content-Type", "application/json")
+	_, _ = writer.Write([]byte("Merge successfully"))
+}
+
+func handleBackup(writer http.ResponseWriter, request *http.Request) {
+	if request.Method != http.MethodPost {
+		http.Error(writer, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	dir := request.URL.Query().Get("dir")
+	if dir == "" {
+		http.Error(writer, "dir is empty", http.StatusBadRequest)
+		return
+	}
+
+	err := db.Backup(dir)
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
+		log.Printf("failed to backup db: %v\n", err)
+		return
+	}
+	writer.Header().Set("Content-Type", "application/json")
+	_, _ = writer.Write([]byte("Backup successfully"))
+}
+
 func main() {
 	// 注册处理方法
 	http.HandleFunc("/bitcask/put", handlePut)
@@ -113,6 +152,8 @@ func main() {
 	http.HandleFunc("/bitcask/delete", handleDelete)
 	http.HandleFunc("/bitcask/listkeys", handleListKeys)
 	http.HandleFunc("/bitcask/stat", handleStat)
+	http.HandleFunc("/bitcask/merge", handleMerge)
+	http.HandleFunc("/bitcask/backup", handleBackup)
 
 	// 启动 HTTP 服务
 	http.ListenAndServe("localhost:8080", nil)

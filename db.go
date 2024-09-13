@@ -56,7 +56,7 @@ func Open(options Options) (*DB, error) {
 	}
 
 	var isInitial bool
-	// 判断数据目录是否存在，如果不存在，则创建这个目录
+	// 判断数据目录是否存在，如果不存在的话，则创建这个目录
 	if _, err := os.Stat(options.DirPath); os.IsNotExist(err) {
 		isInitial = true
 		if err := os.MkdirAll(options.DirPath, os.ModePerm); err != nil {
@@ -97,7 +97,7 @@ func Open(options Options) (*DB, error) {
 		return nil, err
 	}
 
-	// 加载对应数据文件
+	// 加载数据文件
 	if err := db.loadDataFiles(); err != nil {
 		return nil, err
 	}
@@ -114,7 +114,7 @@ func Open(options Options) (*DB, error) {
 			return nil, err
 		}
 
-		// 重置 IO 类型为标准文件IO
+		// 重置 IO 类型为标准文件 IO
 		if db.options.MMapAtStartup {
 			if err := db.resetIoType(); err != nil {
 				return nil, err

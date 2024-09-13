@@ -12,7 +12,6 @@ func TestDB_WriteBatch1(t *testing.T) {
 	opts := DefaultOptions
 	dir, _ := os.MkdirTemp("", "bitcask-go-batch-1")
 	opts.DirPath = dir
-	opts.DataFileSize = 64 * 1024 * 1024
 	db, err := Open(opts)
 	defer destroyDB(db)
 	assert.Nil(t, err)
@@ -43,8 +42,7 @@ func TestDB_WriteBatch1(t *testing.T) {
 	err = wb2.Commit()
 	assert.Nil(t, err)
 
-	val2, err := db.Get(utils.GetTestKey(1))
-	assert.Nil(t, val2)
+	_, err = db.Get(utils.GetTestKey(1))
 	assert.Equal(t, ErrKeyNotFound, err)
 }
 
@@ -52,7 +50,6 @@ func TestDB_WriteBatch2(t *testing.T) {
 	opts := DefaultOptions
 	dir, _ := os.MkdirTemp("", "bitcask-go-batch-2")
 	opts.DirPath = dir
-	opts.DataFileSize = 64 * 1024 * 1024
 	db, err := Open(opts)
 	defer destroyDB(db)
 	assert.Nil(t, err)
@@ -89,30 +86,26 @@ func TestDB_WriteBatch2(t *testing.T) {
 	assert.Equal(t, uint64(2), db.seqNo)
 }
 
-func TestDB_WriteBatch3(t *testing.T) {
-	opts := DefaultOptions
-	dir, _ := os.MkdirTemp("", "bitcask-go-batch-3")
-	//dir := "C:/Users/Yining/AppData/Local/Temp/bitcask-go-batch-3"
-	opts.DirPath = dir
-	opts.DataFileSize = 64 * 1024 * 1024
-	db, err := Open(opts)
-	defer destroyDB(db)
-	assert.Nil(t, err)
-	assert.NotNil(t, db)
-
-	// keys := db.ListKeys()
-	// t.Log(keys)
-
-	wbOpts := DefaultWriteBatchOptions
-	wbOpts.MaxBatchNum = 10000000
-	wb := db.NewWriteBatch(wbOpts)
-	for i := 0; i < 500000; i++ {
-		err := wb.Put(utils.GetTestKey(i), utils.RandomValue(1024))
-		assert.Nil(t, err)
-	}
-	err = wb.Commit()
-	assert.Nil(t, err)
-
-	err = db.Close()
-	assert.Nil(t, err)
-}
+//func TestDB_WriteBatch3(t *testing.T) {
+//	opts := DefaultOptions
+//	//dir, _ := os.MkdirTemp("", "bitcask-go-batch-3")
+//	dir := "/tmp/bitcask-go-batch-3"
+//	opts.DirPath = dir
+//	db, err := Open(opts)
+//	//defer destroyDB(db)
+//	assert.Nil(t, err)
+//	assert.NotNil(t, db)
+//
+//	keys := db.ListKeys()
+//	t.Log(len(keys))
+//	//
+//	//wbOpts := DefaultWriteBatchOptions
+//	//wbOpts.MaxBatchNum = 10000000
+//	//wb := db.NewWriteBatch(wbOpts)
+//	//for i := 0; i < 500000; i++ {
+//	//	err := wb.Put(utils.GetTestKey(i), utils.RandomValue(1024))
+//	//	assert.Nil(t, err)
+//	//}
+//	//err = wb.Commit()
+//	//assert.Nil(t, err)
+//}

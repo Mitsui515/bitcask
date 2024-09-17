@@ -142,8 +142,13 @@ func Open(options Options) (*DB, error) {
 // Close 关闭数据库
 func (db *DB) Close() error {
 	defer func() {
+		// 释放文件锁
 		if err := db.fileLock.Unlock(); err != nil {
 			panic(fmt.Sprintf("failed to unlock the directory, %v", err))
+		}
+		// 关闭索引
+		if err := db.index.Close(); err != nil {
+			panic(fmt.Sprintf("failed to close index"))
 		}
 	}()
 	if db.activeFile == nil {
@@ -151,11 +156,6 @@ func (db *DB) Close() error {
 	}
 	db.mu.Lock()
 	defer db.mu.Unlock()
-
-	// 关闭索引
-	if err := db.index.Close(); err != nil {
-		return err
-	}
 
 	// 保存当前事务序列号
 	seqNoFile, err := data.OpenSeqNoFile(db.options.DirPath)
@@ -174,7 +174,7 @@ func (db *DB) Close() error {
 		return err
 	}
 
-	// 关闭当前活跃文件
+	//	关闭当前活跃文件
 	if err := db.activeFile.Close(); err != nil {
 		return err
 	}

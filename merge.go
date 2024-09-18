@@ -58,6 +58,7 @@ func (db *DB) Merge() error {
 
 	// 持久化当前活跃文件
 	if err := db.activeFile.Sync(); err != nil {
+		db.mu.Unlock()
 		return err
 	}
 	// 将当前活跃文件转换为旧的数据文件
@@ -65,7 +66,7 @@ func (db *DB) Merge() error {
 	// 打开新的活跃文件
 	if err := db.setActiveDataFile(); err != nil {
 		db.mu.Unlock()
-		return err
+		return nil
 	}
 	// 记录最近没有参与 merge 的文件 id
 	nonMergeFileId := db.activeFile.FileId
@@ -77,7 +78,7 @@ func (db *DB) Merge() error {
 	}
 	db.mu.Unlock()
 
-	// 将 merge 的文件从小到大进行排序，依次 merge
+	//	待 merge 的文件从小到大进行排序，依次 merge
 	sort.Slice(mergeFiles, func(i, j int) bool {
 		return mergeFiles[i].FileId < mergeFiles[j].FileId
 	})
@@ -102,7 +103,7 @@ func (db *DB) Merge() error {
 		return err
 	}
 
-	// 打开 Hint 文件存储索引
+	// 打开 hint 文件存储索引
 	hintFile, err := data.OpenHintFile(mergePath)
 	if err != nil {
 		return err
@@ -125,7 +126,7 @@ func (db *DB) Merge() error {
 			if logRecordPos != nil &&
 				logRecordPos.Fid == dataFile.FileId &&
 				logRecordPos.Offset == offset {
-				// 清楚事务标记
+				// 清除事务标记
 				logRecord.Key = logRecordKeyWithSeq(realKey, nonTransactionSeqNo)
 				pos, err := mergeDB.appendLogRecord(logRecord)
 				if err != nil {
@@ -165,6 +166,7 @@ func (db *DB) Merge() error {
 	if err := mergeFinishedFile.Sync(); err != nil {
 		return err
 	}
+
 	return nil
 }
 

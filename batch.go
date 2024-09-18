@@ -46,7 +46,7 @@ func (wb *WriteBatch) Put(key []byte, value []byte) error {
 	return nil
 }
 
-// Delete 批量删除数据
+// Delete 删除数据
 func (wb *WriteBatch) Delete(key []byte) error {
 	if len(key) == 0 {
 		return ErrKeyIsEmpty
@@ -81,14 +81,14 @@ func (wb *WriteBatch) Commit() error {
 		return ErrExceedMaxBatchNum
 	}
 
-	// 加锁保证事务提交并行化
+	// 加锁保证事务提交串行化
 	wb.db.mu.Lock()
 	defer wb.db.mu.Unlock()
 
 	// 获取当前最新的事务序列号
 	seqNo := atomic.AddUint64(&wb.db.seqNo, 1)
 
-	// 开始写数据到数据文件
+	// 开始写数据到数据文件当中
 	positions := make(map[string]*data.LogRecordPos)
 	for _, record := range wb.pendingWrites {
 		logRecordPos, err := wb.db.appendLogRecord(&data.LogRecord{
@@ -133,13 +133,13 @@ func (wb *WriteBatch) Commit() error {
 		}
 	}
 
-	// 清空缓存数据
+	// 清空暂存数据
 	wb.pendingWrites = make(map[string]*data.LogRecord)
 
 	return nil
 }
 
-// key+Seq No 编码
+// key+Seq Number 编码
 func logRecordKeyWithSeq(key []byte, seqNo uint64) []byte {
 	seq := make([]byte, binary.MaxVarintLen64)
 	n := binary.PutUvarint(seq[:], seqNo)

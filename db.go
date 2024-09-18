@@ -148,7 +148,7 @@ func (db *DB) Close() error {
 		}
 		// 关闭索引
 		if err := db.index.Close(); err != nil {
-			panic(fmt.Sprintf("failed to close index"))
+			panic("failed to close index")
 		}
 	}()
 	if db.activeFile == nil {

@@ -11,8 +11,8 @@ const bptreeIndexFileName = "bptree-index"
 
 var indexBucketName = []byte("bitcask-index")
 
-// B+ 树索引
-// 主要封装了 go.etcd.io/bbolt
+// BPlusTree B+ 树索引
+// 主要封装了 go.etcd.io/bbolt 库
 type BPlusTree struct {
 	tree *bbolt.DB
 }
@@ -116,7 +116,7 @@ type bptreeIterator struct {
 func newBptreeIterator(tree *bbolt.DB, reverse bool) *bptreeIterator {
 	tx, err := tree.Begin(false)
 	if err != nil {
-		panic("failed to begin a trasaction")
+		panic("failed to begin a transaction")
 	}
 	bpi := &bptreeIterator{
 		tx:      tx,

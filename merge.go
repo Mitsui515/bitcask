@@ -215,10 +215,10 @@ func (db *DB) loadMergeFiles() error {
 
 	nonMergeFileId, err := db.getNonMergeFileId(mergePath)
 	if err != nil {
-		return err
+		return nil
 	}
 
-	// 删除对应数据文件
+	// 删除旧的数据文件
 	var fileId uint32 = 0
 	for ; fileId < nonMergeFileId; fileId++ {
 		fileName := data.GetDataFileName(db.options.DirPath, fileId)
@@ -232,8 +232,8 @@ func (db *DB) loadMergeFiles() error {
 	// 将新的数据文件移动到数据目录中
 	for _, fileName := range mergeFileNames {
 		srcPath := filepath.Join(mergePath, fileName)
-		destName := filepath.Join(db.options.DirPath, fileName)
-		if err := os.Rename(srcPath, destName); err != nil {
+		destPath := filepath.Join(db.options.DirPath, fileName)
+		if err := os.Rename(srcPath, destPath); err != nil {
 			return err
 		}
 	}
@@ -281,7 +281,7 @@ func (db *DB) loadIndexFromHintFile() error {
 			return err
 		}
 
-		// 解码拿到实际的位置信息
+		// 解码拿到实际的位置索引
 		pos := data.DecodeLogRecordPos(logRecord.Value)
 		db.index.Put(logRecord.Key, pos)
 		offset += size

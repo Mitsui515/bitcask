@@ -416,6 +416,7 @@ func (rds *RedisDataStructure) ZScore(key []byte, member []byte) (float64, error
 		return -1, nil
 	}
 
+	// 构造数据部分的key
 	zk := &zsetInternalKey{
 		key:     key,
 		version: meta.version,

@@ -169,7 +169,7 @@ func (zk *zsetInternalKey) encodeWithMember() []byte {
 
 func (zk *zsetInternalKey) encodeWithScore() []byte {
 	scoreBuf := utils.Float64ToBytes(zk.score)
-	buf := make([]byte, len(zk.key)+len(zk.member)+len(scoreBuf)+8)
+	buf := make([]byte, len(zk.key)+len(zk.member)+len(scoreBuf)+8+4)
 	// key
 	var index = 0
 	copy(buf[index:index+len(zk.key)], zk.key)
@@ -187,6 +187,7 @@ func (zk *zsetInternalKey) encodeWithScore() []byte {
 	copy(buf[index:index+len(zk.member)], zk.member)
 	index += len(zk.member)
 
+	// member size
 	binary.LittleEndian.PutUint32(buf[index:], uint32(len(zk.member)))
 
 	return buf

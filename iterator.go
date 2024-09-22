@@ -64,7 +64,7 @@ func (it *Iterator) skipToNext() {
 
 	for ; it.indexIter.Valid(); it.indexIter.Next() {
 		key := it.indexIter.Key()
-		if prefixLen <= len(key) && bytes.Compare(it.options.Prefix, key[:prefixLen]) == 0 {
+		if prefixLen <= len(key) && bytes.Equal(it.options.Prefix, key[:prefixLen]) {
 			break
 		}
 	}

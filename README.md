@@ -1,6 +1,6 @@
 # Bitcask KV
 
-Bitcask KV is a high-performance Key-Value storage engine based on the Bitcask model, implemented in Go.
+Bitcask KV is a high-performance Key-Value storage engine based on the Bitcask model, implemented in Golang.
 
 ## Features
 
